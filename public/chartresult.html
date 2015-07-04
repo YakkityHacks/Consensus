@@ -22,7 +22,7 @@
 
 .axis text {
   font: 10px sans-serif;
-  fill: black;
+  fill: white;
 }
 
 .axis path,
@@ -36,9 +36,9 @@
   display: none;
 }
 
-
 </style>
 <svg class="chart"></svg>
+<body bgcolor="#000000"> 
 <script src="d3.js"></script>
 <script>
 
@@ -239,7 +239,7 @@ jsonobject = examplejson;
     .attr("text-anchor", "middle") 
 	.style("font-family", "sans-serif")
     .style("font-size", "30px")
-    .style("fill", "black")
+    .style("fill", "white")
 
     .text(question);
 
@@ -255,7 +255,7 @@ jsonobject = examplejson;
     .attr("y",screeny(1))
     .attr('width',0)
     .attr('height',screeny(1))
-    .style("stroke", "black")
+    .style("stroke", "white")
  	.style("stroke-width", "1px")
  	.transition().duration(1000)
  	.attr('width',width*0.8)
@@ -337,7 +337,7 @@ jsonobject = examplejson;
 	.attr('y',screeny(5.5))
 	.style("font-family", "sans-serif")
     .style("font-size", "30px")
-    .style("fill", "black")
+    .style("fill", "white")
     .text("Next Question!")
 
 
@@ -453,7 +453,7 @@ jsonobject = examplejson;
  		.text("Your Answer")
  		.style("font-family", "sans-serif")
     	.style("font-size", "20px")
-    	.style("fill", "black")
+    	.style("fill", "blue")
 
 
  	//Append the correct answer
@@ -464,7 +464,7 @@ jsonobject = examplejson;
  		.attr("y2",heightfromtop*0.9)
  		.attr('height',chartheight)
  		.attr("stroke-width",4)
- 		.attr("stroke", "Green");
+ 		.attr("stroke", "green");
 
  	chart.append("text")
  		.attr("x",widthfromleft+chartx(answer)+(barWidth - 5)/2)
@@ -472,7 +472,7 @@ jsonobject = examplejson;
  		.text("Correct Answer")
  		.style("font-family", "sans-serif")
     	.style("font-size", "20px")
-    	.style("fill", "black")
+    	.style("fill", "green")
 // 	  bar.append("text")
 // 	      .attr("x", barWidth / 2)
 // 	      .attr("y", function(d) { return y(d.value) + 3; })
