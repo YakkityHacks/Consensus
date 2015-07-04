@@ -5,9 +5,20 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
 var api = require('./routes/api');
+var index = require('./routes/index');
+var questionRoute = require('./routes/question');
+var questionModel = require('./models/question');
+
+var mongoose   = require('mongoose');
+
+db = mongoose.createConnection('mongodb://dfreya:dfreya@apollo.modulusmongo.net:27017/mI4mirev',
+  function(err) {
+            if (err)
+                console.log(err);
+            });
+
+mongoose.set('debug', true);
 
 var app = express();
 
@@ -24,9 +35,27 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
-app.use('/api', api);
+app.use('/api/questions', questionRoute);
+
+console.log('before questionModel');
+{ type: 'jungle' }
+// questionModel.find({}, function(err, docs) {
+//   console.log('inside questionModel');
+//     if (!err){ 
+//         console.log(docs);
+//         process.exit();
+//     } else {throw err;}
+// });
+
+
+questionModel.count({ answer: '520766' }, function (err, count) {
+  if (err)
+    throw(err);
+  console.log('there are %d questions', count);
+});
+
+console.log('after questionModel');
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
