@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+</style>
+<svg class="chart"></svg>
+<body bgcolor="#000000"> 
+<script src="d3.js"></script>
+<script src="d3.slider.js"></script>
+<script src="chartresult.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+<div class="wrapper">
+
+
+<h1 id="question"> Loading Question from Database...</h1>
+<div id="slider"></div>
+
+</div>
+
+<br><br>
+<h1 id="slidertext" opacity:0>100</h1>
+<br><br>
+
+<div style="text-align: center;">
+<a id="submit" style="cursor: pointer;"><img border="0" src="submit.png" alt=""></a>
+</div>
+
+<script>
+
+//On First Load
+if (typeof score == "undefined") {
+   //Run on the first time load
+
+   score = 0;
+   var questionsAnswered = 0;
+}
+
+acceptSubmit =false
+
+function LoadResults()
+{
+	if (acceptSubmit == true)
+	{
+		d3.selectAll("h1").style("opacity,0")
+		pullJSONQuestion.playerAnswer = d3.select('#slidertext').text()
+		ShowResults(pullJSONQuestion,score)
+	}
+	questionsAnswered++
+
+	//d3.select("#question").style("opacity",0)
+	//Get a new question in background
+}
+
+
+function GetQuestion()
+{
+	
+	pullJSONQuestion = 
+	{
+		"question": "Has anyone ever been so far even as to decided to what to do look more like?",
+		"answer": 10,
+		"availableAnswers": d3.range(1,101),
+		"minval": 1,
+		"maxval": 100,
+		"steps": 100,
+		"allGuesses": [38,23,34,57,84,24,39,93,73,87,11,63,92,57,24,34,47,11,49,86,88,17,97,85,99,75,92,99,94,21,71,24,88,92,5,67,18,44,13,86,38,47,88,3,45,17,72,29,55,36,20,51,73,35,61,98,90,73,22,96,92,89,17,7,39,97,9,5,80,14,65,41,63,81,6,76,60,61,90,73,3,58,68,52,31,25,21,55,42,83,49,58,21,27,16,24,64,56,48,90]
+	};
+
+	return pullJSONQuestion
+}
+
+
+
+function PrepareQuestion()
+{
+
+
+	var minval = pullJSONQuestion.minval
+	var maxval = pullJSONQuestion.maxval
+	var startval = (maxval-minval)*Math.random()+minval
+	var stepsize = (maxval-minval+1)/pullJSONQuestion.steps
+
+	d3.select("#question").text(pullJSONQuestion.question)
+	d3.select("#slidertext").style("opacity",0)
+	d3.select("#slider").call(
+
+		d3.slider().axis(true).min(minval).max(maxval).value(startval).step(stepsize)
+		.on("slide", function(evt, value) {
+			acceptSubmit = true
+			d3.select('#slidertext').text(value).style("opacity",1);
+		})
+		)
+
+	d3.transition().delay(1000).selectAll("text").attr("fill","white")
+
+	window.onload = function() {
+	      document.getElementById("submit").onclick = function() {
+	         LoadResults()
+	      };
+	   };
+}
+
+pullJSONQuestion = GetQuestion()
+PrepareQuestion()
+
+</script> 
+

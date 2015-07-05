@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<style>
+//JSON object must contain
 
-</style>
-<svg class="chart"></svg>
-<body bgcolor="#000000"> 
-<script src="d3.js"></script>
-<link rel="stylesheet" type="text/css" href="style.css">
-<script>
+// "question": "Has anyone ever been so far even as to decided to what to do look more like?",
+// "answer": 10,
+// "playerAnswer": 60,
+// "availableAnswers": d3.range(1,101),
+// "allGuesses": [38,23,34,57,84,24,39,93,73,87,11,63,92,57,24,34,47,11,49,86,88,17,97,85,99,75,92,99,94,21,71,24,88,92,5,67,18,44,13,86,38,47,88,3,45,17,72,29,55,36,20,51,73,35,61,98,90,73,22,96,92,89,17,7,39,97,9,5,80,14,65,41,63,81,6,76,60,61,90,73,3,58,68,52,31,25,21,55,42,83,49,58,21,27,16,24,64,56,48,90]
+
 
 
 function BarTypes(answer,playerAnswer,barValue, playerAnswerAboveAnswer)
@@ -113,7 +111,7 @@ function GetXOfBarTypes(answer,playerAnswer,availableAnswers,playerAnswerAboveAn
 	return barsize
 }
 
-function showresults(jsonobject)
+function ShowResults(jsonobject)
 {
 
 
@@ -247,7 +245,36 @@ function showresults(jsonobject)
  	.style("stroke-width", "1px")
  	.transition().delay(1000).duration(1000)
  	.attr("y",screeny(1))
+
+ 	//ShowPlayerScore
+ 	var difference = playerAnswer-answer
+
  	
+ 	pointsearned = 100-difference;
+
+ 	var scoreDisplay = chart.append("text")
+ 	.attr('x',screenx(4.5))
+ 	.attr("y",screeny(0.5))
+ 	.attr("class","chartText")
+ 	.style("fill","white")
+ 	.text("Your Current Score: ")
+
+
+	var scoreDisplay = chart.append("text")
+ 	.attr('x',screenx(5.5))
+ 	.attr("y",screeny(0.5))
+ 	.attr("class","chartText")
+ 	.style("fill","white")
+ 	.text(score)
+ 	.transition().duration(1000).delay(1000)
+ 	.tween("text", function() {
+		  var i = d3.interpolateRound(score, score+pointsearned);
+		  return function(t) {
+		    this.textContent = i(t);
+		  };
+	});
+ 	
+    setTimeout(function(){score = score+pointsearned;},2000)
 
   	chart.append('text')
  		.attr("x",widthfromleft+chartx(playerAnswer)+barWidth/2)
@@ -258,8 +285,8 @@ function showresults(jsonobject)
     	.transition().delay(1000).duration(1000)
     	.attr("y",screeny(2.4))
 
-    var differrence = playerAnswer-answer
-    parseInt()
+    
+
   	chart.append('text')
  		.attr("x",function()
  			{
@@ -280,21 +307,41 @@ function showresults(jsonobject)
     	.style("stroke-width","1px")
     	.style("font-size","30px")
     	.style('opacity',0)
-    	.text("You were out by: " + differrence)
+    	.text(function()
+    		{
+    			if (answer != playerAnswer)
+    			{
+    				return "You were out by: " + difference
+    			}
+    			else
+    			{
+    				return "You Are Correct!"
+    			}
+    		})
     	.transition().duration(1000).delay(2000)
     	.style('opacity',1)
 
 
 
     //Add object to go to next question
-    chart.append("text")
-    .attr("x",screenx(8))
-	.attr('y',screeny(5.5))
-	.style("font-family", "sans-serif")
-    .style("font-size", "30px")
-    .style("fill", "white")
-    .text("Next Question!")
+    chart.append("svg:image")
+	    .attr("x",screenx(8))
+		.attr('y',screeny(4.5))
+		.attr('width', screenx(1))
+   		.attr('height', screeny(0.8))
+		.attr("xlink:href","next.png")
+		.on("click",function() 
+			{
+				listtoremove = d3.select("svg")[0][0].children
+				i = listtoremove.length-1
 
+				while (i>=0)
+				{
+					listtoremove[i].remove();
+					i=i-1;
+				}
+				chart.attr("width",0).attr("height",0)
+			})
 
 
  	 //Create x-Axis
@@ -442,6 +489,5 @@ function showresults(jsonobject)
 
 // jsonobject = examplejson;
 
-// showresults(examplejson)
+// ShowResults(examplejson)
 
-</script>

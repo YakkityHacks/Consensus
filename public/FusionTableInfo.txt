@@ -1,0 +1,17 @@
+Dev:
+
+key= AIzaSyDaqGYgg7-5z8d1i1CT4O43jHGrfBKa5pM
+ID = 1RenyfBpnH9qDuCwnLsJS5gXFBizRX0i2iTp0AK3y
+
+interface: https://www.google.com/fusiontables/data?docid=1RenyfBpnH9qDuCwnLsJS5gXFBizRX0i2iTp0AK3y#rows:id=1
+
+
+https://www.googleapis.com/fusiontables/v1/query?sql=SELECT%20*%20FROM%201RenyfBpnH9qDuCwnLsJS5gXFBizRX0i2iTp0AK3y&key=AIzaSyDaqGYgg7-5z8d1i1CT4O43jHGrfBKa5pM
+
+
+
+Prod:
+https://www.google.com/fusiontables/DataSource?docid=1JCj-wWF23SaEYaYDACkwQDWha8pFCPdWHb367ZqY
+Key = AIzaSyCAp3J6KVIqYE42abk0x7CLlKFphXpNaQM
+
+fusionapi = "https://www.googleapis.com/fusiontables/v1/query?sql=SELECT%20ROWID,%20category,%20question,%20answer,%20min,%20max,%20funfact,%20image,%20datasource,%20datasourceurl,%20magnitude,%20guesses%20FROM%201JCj-wWF23SaEYaYDACkwQDWha8pFCPdWHb367ZqY&key=AIzaSyCAp3J6KVIqYE42abk0x7CLlKFphXpNaQM"

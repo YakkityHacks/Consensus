@@ -1,165 +1,483 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
-	h1
-	{
-		text-align: center;
-		color: white;
-	}
-
-	h2
-	{
-		text-align: center;
-		color: white;
-	}
-
-	h3
-	{
-		text-align: center;
-		color: white;
-	}
-
-	.wrapper div {
-		margin: 35px 0;
-	}
-
-    .wrapper {
-      width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    #slider7 {
-    	height: 250px;
-    }
-
-
-	.d3-slider {
-	    position: relative;
-	    font-family: Verdana,Arial,sans-serif;
-	    font-size: 1.1em;
-	    border: 1px solid #aaaaaa;
-	    z-index: 2;
-	}
-
-	.d3-slider-horizontal {
-	    height: .8em;
-	}  
-
-	.d3-slider-range {
-	  background:#2980b9;
-	  left:0px;
-	  right:0px;
-	  height: 0.8em;
-	  position: absolute;
-	}
-
-	.d3-slider-range-vertical {
-	  background:#2980b9;
-	  left:0px;
-	  right:0px;
-	  position: absolute;
-	  top:0;
-	}
-
-	.d3-slider-vertical {
-	    width: .8em;
-	    height: 100px;
-	}      
-
-	.d3-slider-handle {
-	    position: absolute;
-	    width: 1.2em;
-	    height: 1.2em;
-	    border: 1px solid #d3d3d3;
-	    border-radius: 4px;
-	    background: #eee;
-	    background: linear-gradient(to bottom, #eee 0%, #ddd 100%);
-	    z-index: 3;
-	}
-
-	.d3-slider-handle:hover {
-	    border: 1px solid #999999;
-	}
-
-	.d3-slider-horizontal .d3-slider-handle {
-	    top: -.3em;
-	    margin-left: -.6em;
-	}
-
-	.d3-slider-axis {
-	    position: relative;
-	    z-index: 1;    
-	}
-
-	.d3-slider-axis-bottom {
-	    top: .8em;
-	}
-
-	.d3-slider-axis-right {
-	    left: .8em;
-	}
-
-	.d3-slider-axis path {
-	    stroke-width: 0;
-	    fill: none;
-	}
-
-	.d3-slider-axis line {
-	    fill: none;
-	    stroke: #aaa;
-	    shape-rendering: crispEdges;
-	}
-
-	.d3-slider-axis text {
-		color: white;
-	    font-size: 20px;
-	    
-	}
-
-	.d3-slider-vertical .d3-slider-handle {
-	    left: -.25em;
-	    margin-left: 0;
-	    margin-bottom: -.6em;      
-	}
-
-
 
 </style>
-<svg class="chart"></svg>
+<svg class="chart" height=0></svg>
 <body bgcolor="#000000"> 
 <script src="d3.js"></script>
 <script src="d3.slider.js"></script>
+<script src="d3.tip.js"></script>
+<script src="chartresult.js"></script>
+<script src="jquery-2.1.4.min.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
 <div class="wrapper">
-
-
+<h1 id="Category"></h1>
 <h1 id="question"> Loading Question from Database...</h1>
+<h1 id="dataSource"></h1>
 <div id="slider"></div>
 
 </div>
 
 <br><br>
-<h1 id="slidertext" opacity:0>100</h1>
+<h1 id="slidertext" opacity:0></h1>
 <br><br>
 
 <div style="text-align: center;">
-<a onclick="window.open(this.href,this.target);return false;" href="question.html" target="question"><img border="0" src="submit.png" alt=""></a>
+<a id="submit" style="cursor: pointer;"><img border="0" src="submit.png" alt=""></a>
+<a id="newquestion" style="cursor: pointer;"><img border="0" src="skip.png" alt=""></a>
 </div>
 
+<div id ="final"></div>
+
+
 <script>
-//Change
-d3.select("#question").text("In What Year did Andrew Completely Snap?")
-d3.select("#slidertext").style("opacity",0)
-d3.select("#slider").call(
 
-	d3.slider().axis(true).min(2000).max(2100).step(1)
-	.on("slide", function(evt, value) {
-		d3.select('#slidertext').text(value).style("opacity",1);
-	})
-	)
+//filthiest hack known to man
+	document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+	document.body.scroll = "no"; // ie only+
+function LinearRound(xtemp)
+{
+	xstring = String(xtemp)
+	orderOfMagnitude = xstring.length
+	return parseInt(xtemp/Math.pow(10,orderOfMagnitude-3))*Math.pow(10,orderOfMagnitude-3)
+}
 
-d3.transition().delay(1000).selectAll("text").attr("fill","white")
+function EndOfQuiz()
+{
+	d3.selectAll("#question").remove()
+	d3.selectAll("#slider").remove()
+	d3.selectAll("#slidertext").remove()
+	d3.selectAll("#submit").remove()
+	d3.selectAll("#newquestion").remove()
+	d3.selectAll("#dataSource").remove()
+	d3.selectAll("#Category").remove()
+
+	d3.selectAll("#final").append("h1")
+		.text("Questions Answered: "+questionsAnswered)
+
+	d3.selectAll("#final").append("h1")
+		.text("Final Score (Number of people that you beat): "+score)
+
+	d3.selectAll("#final").append("h1")
+		.text("Refresh Browser to Restart Quiz")
+
+}
+
+function UpdateFusion(rowId, guesses)
+{
+	fusionapiUpdate = "https://www.googleapis.com/fusiontables/v1/query?sql=UPDATE%201JCj-wWF23SaEYaYDACkwQDWha8pFCPdWHb367ZqY%20SET%20guesses%20=%20" + JSON.stringify(guesses) + "%20where%20ROWID%20=%20" + rowId + "&key=AIzaSyCAp3J6KVIqYE42abk0x7CLlKFphXpNaQM"
+
+	$.post(fusionapiUpdate)
+	fusionapiUpdate = "https://www.googleapis.com/fusiontables/v1/query?sql=UPDATE%201JCj-wWF23SaEYaYDACkwQDWha8pFCPdWHb367ZqY%20SET%20guesses%20=%20300%20WHERE%20ROWID%20=%20'1'&key=AIzaSyCAp3J6KVIqYE42abk0x7CLlKFphXpNaQM"
+}
+
+
+function FormatNumber(number,magnitude)
+{
+	if (magnitude == "percentage")
+	{
+		return parseInt(number)+"%"
+	}
+	else if (number < 1000)
+	{
+		return number
+	}
+	else if (number < 1000000)
+	{
+		return parseInt(number/100)/10 + " Thousand"
+	}
+	else if (number < 1000000000)
+	{
+		return parseInt(number/100000)/10 + " Million"
+	}
+	else
+	{
+		return parseInt(number/100000000)/10 + " Trillion"
+	}
+}
+
+function PrepareQuestion(pullJSONQuestion,rows)
+{
+	var minval = pullJSONQuestion.minval
+	var maxval = pullJSONQuestion.maxval
+	var startval = (maxval-minval)*Math.random()+minval
+	var stepsize = (maxval-minval+1)/ (pullJSONQuestion.steps-1)
+	var magnitude = pullJSONQuestion.magnitude 
+
+	var x = pullJSONQuestion.availableAnswers
+
+	interval = 9
+	if (magnitude == "percentage" )
+	{
+		interval = 10
+	}
+	else if (magnitude == "linear")
+	{
+		interval = 9
+	}
+	
+	var tenx  = []
+
+	for (i in d3.range(1,x.length,1))
+	{
+
+		if (i%interval==0)
+			{
+				tenx.push(x[i])
+			}
+	}
+
+	if (x[x.length-1] in tenx == false)
+	{
+		tenx.push(x[x.length-1]) 
+	}
+
+	d3.select("#Category").text("Category: "+pullJSONQuestion.category)
+	d3.select("#question").text("Question "+(questionsAnswered+1)+": "+pullJSONQuestion.question)
+
+	d3.select("#dataSource").select("p").remove()
+
+	d3.select("#dataSource").append("p")
+		.text("Data sourced from: ")
+		.append("a").attr("href",pullJSONQuestion.dataSourceLink)
+		.text(pullJSONQuestion.dataSource)
+
+
+	d3.select("#slidertext").style("opacity",0)
+
+	axisObject = d3.svg.axis()
+				.tickValues(tenx)
+				.tickFormat(d3.format(",.1s"))
+
+	if (magnitude != "logarithimic")
+	{
+
+		d3.select("#slider").call(
+		d3.slider()
+		.axis(
+				axisObject
+			)
+		.min(minval).max(maxval+1).value(startval).step(stepsize)
+		
+		.on("slide", function(evt, value) {
+
+			acceptSubmit = true
+
+			d3.select('#slidertext').attr("activevalue",function()
+				{
+					return parseInt(value);
+				})
+			.text(function()
+			{
+				value = LinearRound(this.getAttribute("activevalue"))
+				return FormatNumber(value,pullJSONQuestion.magnitude)
+			}).style("opacity",1);
+		})
+		)
+	}
+	else
+	{
+
+
+		d3.select("#slider").call(
+		d3.slider()
+			.scale(d3.scale.ordinal().domain(x)
+			.rangePoints([0, 1],1/x.length))
+		.axis(
+				d3.svg.axis()
+				.tickValues(tenx)
+				.tickFormat(d3.format(",.1s"))
+			)
+		
+		.on("slide", function(evt, value) {
+
+			acceptSubmit = true
+
+			d3.select('#slidertext').attr("activevalue",function()
+				{
+						return value;
+				})
+			.text(function()
+			{
+				value = this.getAttribute("activevalue")
+				return FormatNumber(value,pullJSONQuestion.magnitude)
+			}).style("opacity",1);
+		})
+		)
+	}
+
+	d3.transition().delay(1000).selectAll("text").attr("fill","white")
+
+	document.getElementById("submit").onclick = function() {
+		LoadResults(pullJSONQuestion,rows)
+	};
+
+	document.getElementById("newquestion").onclick = function() {
+		SkipQuestion(rows)
+	};
+}
+
+function SkipQuestion(rows)
+{
+	d3.select("#Category").text("")
+	d3.select("#question").text("Loading New Question from Database...")
+	d3.select("#dataSource").text("")
+	var childrenToRemove = d3.select("#slider")[0][0].children
+	i = childrenToRemove.length-1
+
+	while (i>=0)
+	{
+		childrenToRemove[i].remove();
+		i=i-1;
+	}
+
+	setTimeout(function()
+		{
+			pullJSONQuestion = GetQuestion(rows);
+			if (pullJSONQuestion != "Fail")
+			{
+				PrepareQuestion(pullJSONQuestion,rows)
+			}
+		},1000)	
+}
+
+function LoadResults(pullJSONQuestion,rows)
+{
+	if (acceptSubmit == true)
+	{
+
+
+		d3.selectAll("h1").style("opacity,0")
+		if (pullJSONQuestion.magnitude != "linear")
+		{
+			pullJSONQuestion.playerAnswer = parseFloat(d3.select('#slidertext')[0][0].getAttribute("activevalue"))
+		}
+		else
+		{
+			pullJSONQuestion.playerAnswer = LinearRound(d3.select('#slidertext')[0][0].getAttribute("activevalue"))
+		}
+		
+		rowId = pullJSONQuestion.questionID
+		guessval = pullJSONQuestion.availableAnswers.indexOf(pullJSONQuestion.playerAnswer)
+		guesses = pullJSONQuestion.allGuesses
+		guesses[guessval] = guesses[guessval] + 1
+
+		UpdateFusion(rowId, guesses)
+
+		ShowResults(pullJSONQuestion)
+
+		var childrenToRemove = d3.select("#slider")[0][0].children
+		i = childrenToRemove.length-1
+
+
+
+		while (i>=0)
+		{
+			childrenToRemove[i].remove();
+			i=i-1;
+		}
+
+
+		resultsactive = true
+
+		ListenResultsClose(rows)
+
+		questionsAnswered++
+
+	}
+
+	//d3.select("#question").style("opacity",0)
+	//Get a new question in background
+}
+
+function ListenResultsClose(rows)
+{
+	if (resultsactive == true)
+	{
+		setTimeout(function(){ListenResultsClose(rows)},500)
+	}
+	else
+	{
+		acceptSubmit = false
+		pullJSONQuestion = GetQuestion(rows);
+		if (pullJSONQuestion != "Fail")
+		{
+			PrepareQuestion(pullJSONQuestion,rows)
+		}
+	}
+}
+
+function GetQuestion(rows)
+{
+	questionsAvailable = rows.length 
+
+
+	if (questionsAnswered == 6)
+	{
+		EndOfQuiz()
+		return "Fail"
+	}
+
+	if (questionsAvailable == 0)
+	{
+		d3.select("#question").text("There are no available questions.")
+		return "Fail"
+	}
+
+	rownumber = parseInt(Math.random()*(questionsAvailable))
+	randomselection = rows[rownumber]
+
+	rows.splice(rownumber,1)
+	questionID = randomselection[0];
+	category = randomselection[1];
+	question = randomselection[2];
+	answer = parseInt(randomselection[3]);
+	minval = parseInt(randomselection[4]);
+	maxval = parseInt(randomselection[5]);
+	datasource = randomselection[8];
+	datasourcelink = randomselection[9];
+	steps = 100;
+	magnitude = randomselection[10];
+
+	if (magnitude == "logarithimic")
+	{
+		if (maxval  > 10000000000)
+		{
+			minval = 1000
+		}
+		else
+		{
+			minval = 1
+		}
+	}
+
+
+	hundredsteps = JSON.parse(randomselection[11]);
+
+	//tensteps = [38,23,34,57,84,24,39,93,73,87,23];
+
+	if (magnitude == "linear")
+	{
+		x = d3.range(minval,maxval+1, (maxval-minval+1)/(steps-1));
+		for (i in x)
+		{
+			xtemp = parseInt(x[i])
+			x[i] = LinearRound(xtemp)
+		}
+	}
+	else if (magnitude == "percentage")
+	{
+		x = d3.range(0,101,1)
+	}
+	else
+	{
+		x = [minval]
+
+		//magnitude = logarithimic
+		for (i in d3.range(2,101,1))
+		{
+			lastentry = String(x[x.length-1]);
+			orderOfMagnitude = lastentry.length;
+			next = parseInt(lastentry) + Math.pow(10,orderOfMagnitude-1);
+			x.push(next)
+		}
+	}
+
+
+	answerinx = false
+
+	for (i in x)
+	{
+		if (parseInt(answer) == x[i])
+		{
+			answerinx = true
+		}
+	}
+
+	if (answerinx == false)
+	{
+		count = 0
+		for (i in x)
+		{
+			if (x[i]<answer)
+			{
+				count++
+			}
+		}
+		lower = x[count]
+		upper = x[count+1]
+		lowerdistance = lower-answer
+		upperdistance = upper-answer
+
+		if (lowerdistance < upperdistance)
+		{
+			answer = lower
+		}
+		else
+		{
+			answer = upper
+		}
+	}
+
+	pullJSONQuestion = 
+	{
+		"question": question,
+		"answer": parseInt(answer),
+		"availableAnswers": x,
+		"minval": parseInt(minval),
+		"maxval": parseInt(maxval),
+		"steps": parseInt(steps),
+		"allGuesses": hundredsteps,
+		"magnitude": magnitude,
+		"questionID": questionID,
+		"category": category,
+		"dataSource": datasource,
+		"dataSourceLink": datasourcelink
+	};
+
+	return pullJSONQuestion
+}
+
+questionsAnswered = 0
+
+//fusionapi = "https://www.googleapis.com/fusiontables/v1/query?sql=SELECT%20ROWID,%20category,%20question,%20answer,%20min,%20max,%20funfact,%20image,%20datasource,%20datasourceurl,%20magnitude,%20guesses%20FROM%201JCj-wWF23SaEYaYDACkwQDWha8pFCPdWHb367ZqY&key=AIzaSyCAp3J6KVIqYE42abk0x7CLlKFphXpNaQM"
+
+fusionapi = "https://www.googleapis.com/fusiontables/v1/query?sql=SELECT%20ROWID,%20category,%20question,%20answer,%20min,%20max,%20funfact,%20image,%20datasource,%20datasourceurl,%20magnitude,%20guesses%20FROM%2015ZtRZ64hv52ehHtcQPGnTUhKmFPBTdcNnkYe0Ofj&key=AIzaSyCAp3J6KVIqYE42abk0x7CLlKFphXpNaQM"
+
+$.get(fusionapi,function(data,status)
+{
+	console.log(status);
+	getTable = data;
+
+
+	var columns = getTable.columns
+	var rows = getTable.rows
+
+	$(function() {
+	    $('body').mousedown(function(e){if(e.button==1)return false});
+	});
+
+	//On First Load
+	if (typeof score == "undefined") {
+	   //Run on the first time load
+	   score = 0;
+	   var questionsAnswered = 0;
+	}
+
+	acceptSubmit =false
+
+	pullJSONQuestion = GetQuestion(rows)
+	if (pullJSONQuestion != "Fail")
+	{
+		PrepareQuestion(pullJSONQuestion,rows)
+	}
+})
+
+
+
+
+
 
 
 </script> 
-
